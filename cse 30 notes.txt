@@ -1,0 +1,35 @@
+muller@eng.ucsd.edu
+is Prof. Muller's e-mail address
+
+Deterministic finite state automaton (DFA) is a way of representing or detecting a language.
+- Example: set of string patterns(e.g. "HA") accepted or rejected on input
+
+Used in
+
+CSE 105
+CSE 140
+CSE 131
+CSE 123
+
+Circle and Arc representation and a DFA Type: Mealy Machine
+
+States: (Circle) Remembers what we have seen so far in the input
+- one of which is the start state (initial)
+- one of which is the end state (we are done)
+
+State Transitions: NExt inout determines transition to a next state
+
+Arcs represent the transition to next state for each (and every) valid input and may have an optional
+action
+
+Label the arrow ith input/action
+
+Refine the DFA to define responses on all possible inputs at each state
+
+Make sure the next state transition is (arc) is unambiguous
+
+Say you want to translate the entire contents of a text file, from the top (TOF) to the bottom (EOF)
+
+To adjust the DFA to act on continuous input (multiple instances of the pattern) "redirect" the arc(s) 
+that point to the end state to point back at the start state
+
