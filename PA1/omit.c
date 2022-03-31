@@ -81,7 +81,7 @@ main(void)
                 }
                 else if (c == EOF) state = CERR;
                 else {
-                    if (c == '\n') 
+                    if (c == '\n') nLineCtr++;
                     state = CCOMM;
                 }
                 break;
