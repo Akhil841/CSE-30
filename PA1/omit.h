@@ -8,5 +8,17 @@
  * type definition (enum) for DFA states
  * function prototypes
  */
-
+enum typestate {
+    START,
+    SLASH,
+    CPPCOMM,
+    CCOMM,
+    CSTAR,
+    CERR,
+    OQUOTE,
+    OCHAR,
+    QERR,
+    CHERR,
+    END
+};
 #endif

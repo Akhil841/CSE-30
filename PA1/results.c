@@ -1,14 +1,14 @@
-/*
- * Programming assignment 1 
- *
- * remove c comments from a source file and write to stdout
- * comments are replaced with a single space
- * handle single and double quoted sequences
- * comments and quoted sequences can span multiple lines
- *
- * error handling:
- *     prints starting line for unterminated comments or quote sequences
- */
+ 
+
+
+
+
+
+
+
+
+
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -25,11 +25,13 @@ main(void)
     int c;
     int line = 1;
     int nLineCtr = 0;
-    //input will be provided
+     
     while (state != END) {
+         
+         
         c = getchar();
         if (c == '\n') line++;
-        //action depends on state
+         
         switch (state) {
             case START:
                 if (c == EOF) state = END;
@@ -81,12 +83,13 @@ main(void)
                 }
                 else if (c == EOF) state = CERR;
                 else {
-                    if (c == '\n') 
+                    if (c == '\n') nLineCtr++;
                     state = CCOMM;
                 }
                 break;
             case CERR:
                 putchar(' ');
+                 
                 for (int i = 0; i < nLineCtr; i++) {
                     putchar('\n');
                 }
@@ -130,7 +133,7 @@ main(void)
                 state = END;
                 break;
             case END:
-                //unused
+                 
                 break;
         }
     }
