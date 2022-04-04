@@ -32,119 +32,144 @@ main(void)
         //action depends on state
         switch (state) {
             case START:
-                if (c == EOF) state = END;
-                else if (c == '/') state = SLASH;
-                else if (c == '\"') {
+                state = STARTsub(c);
+                if (state == END || state == SLASH) break;
+                if (state == OQUOTE || state == OCHAR) {
                     commentBegin = line;
-                    state = OQUOTE;
-                    putchar('\"');
+                    putchar(c);
+                    break;
                 }
-                else if (c == '\'') {
-                    commentBegin = line;
-                    state = OCHAR;
-                    putchar('\'');
+                switch (state) {
+                    case END:
+                    case SLASH:
+                        break;
+                    case OQUOTE:
+                    case OCHAR:
+                        commentBegin = line;
+                        putchar(c);
+                        break;
+                    default:
+                        putchar(c);
+                        break;
                 }
-                else putchar(c);
                 break;
             case SLASH:
-                if (c == '/') state = CPPCOMM;
-                else if (c == '*') {
-                    commentBegin = line;
-                    state = CCOMM;
-                }
-                else {
-                    putchar('/');
-                    if (c != EOF) putchar(c);
-                    state = START;
+                state = SLASHsub(c);
+                switch (state) {
+                    case CPPCOMM: break;
+                    case CCOMM:
+                        commentBegin = line;
+                        break;
+                    default:
+                        putchar('/');
+                        if (c != EOF) putchar(c);
+                        break;
                 }
                 break;
             case CPPCOMM:
-                if (c == '\n') {
-                    state = START;
-                    putchar(' ');
-                    putchar('\n');
+                state = CPPCOMMsub(c);
+                switch (state) {
+                    case START:
+                    case END:
+                        putchar(' ');
+                        putchar('\n');
+                        break;
+                    default: break;
                 }
                 break;
             case CCOMM:
-                if (c == EOF) state = CERR;
-                else if (c == '*') state = CSTAR;
-                else if (c == '\n') nLineCtr++;
+                state = CCOMMsub(c);
+                if (c == '\n') nLineCtr++;
                 break;
             case CSTAR:
-                if (c == '/') {
-                    state = START;
-                    putchar(' ');
-                    for (int i = 0; i < nLineCtr; i++) {
-                        putchar('\n');
-                    }
-                    nLineCtr = 0;
-                }
-                else if (c == EOF) state = CERR;
-                else {
-                    if (c == '\n') nLineCtr++;
-                    state = CCOMM;
+                state = CSTARsub(c);
+                switch (state) {
+                    case START:
+                        putchar(' ');
+                        for (int i = 0; i < nLineCtr; i++) {
+                            putchar('\n');
+                        }
+                        nLineCtr = 0;
+                        break;
+                    case CERR: break;
+                    default:
+                        if (c == '\n') nLineCtr++;
+                        break;
                 }
                 break;
             case CERR:
+                state = CERRsub();
                 putchar(' ');
                 for (int i = 0; i < nLineCtr; i++) {
                     putchar('\n');
                 }
                 fState = CERR;
-                state = END;
                 break;
             case OQUOTE:
-                if (c == EOF) state = QERR;
-                else if (c == '\\') {
-                    putchar(c);
-                    int next = getchar();
-                    if (next == '\n') line++;
-                    putchar(next);
+                state = OQUOTEsub(c);
+                switch (state) {
+                    case QERR: break;
+                    case OQUOTE:
+                        if (c == '\\') {
+                            putchar(c);
+                            int next = getchar();
+                            if (next == '\n') line++;
+                            putchar(next);
+                            break;
+                        }
+                        else {
+                            putchar(c);
+                            break;
+                        }
+                    default:
+                        putchar(c);
+                        break;
                 }
-                else if (c == '\"') {
-                    state = START;
-                    putchar(c);
-                }
-                else putchar(c);
                 break;
             case OCHAR:
-                if (c == EOF) state = CHERR;
-                else if (c == '\\') {
-                    putchar(c);
-                    int next = getchar();
-                    if (next == '\n') line++;
-                    putchar(next);
+                state = OCHARsub(c);
+                switch (state) {
+                    case CHERR: break;
+                    case OCHAR:
+                        if (c == '\\') {
+                            putchar(c);
+                            int next = getchar();
+                            if (next == '\n') line++;
+                            putchar(next);
+                            break;
+                        }
+                        else {
+                            putchar(c);
+                            break;
+                        }
+                    default:
+                        putchar(c);
+                        break;
                 }
-                else if (c == '\'') {
-                    state = START;
-                    putchar(c);
-                }
-                else putchar(c);
                 break;
             case QERR:
+                state = QERRsub();
                 fState = QERR;
-                state = END;
 		        break;
             case CHERR:
+                state = CHERRsub();
                 fState = CHERR;
-                state = END;
                 break;
             case END:
                 //unused
                 break;
         }
     }
-    if (fState == CERR) {
-	    fprintf(stderr, "Error: line %d: unterminated comment\n", commentBegin);
-	    exit(EXIT_FAILURE);	
+    switch (fState) {
+        case CERR:
+            fprintf(stderr, "Error: line %d: unterminated comment\n", commentBegin);
+	        exit(EXIT_FAILURE);
+        case QERR:
+            fprintf(stderr, "Error: line %d: unterminated quote(\")\n", commentBegin);
+	        exit(EXIT_FAILURE);
+        case CHERR:
+            fprintf(stderr, "Error: line %d: unterminated quote(\')\n", commentBegin);
+	        exit(EXIT_FAILURE);
+        default: exit(EXIT_SUCCESS);
     }
-    if (fState == QERR) {
-	    fprintf(stderr, "Error: line %d: unterminated quote(\")\n", commentBegin);
-	    exit(EXIT_FAILURE);
-    }
-    if (fState == CHERR) {
-	    fprintf(stderr, "Error: line %d: unterminated quote(\')\n", commentBegin);
-	    exit(EXIT_FAILURE);
-    }
-    exit(EXIT_SUCCESS);
 }
