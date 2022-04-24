@@ -72,7 +72,7 @@ main(int argc, char **argv)
      * of each column in an input record after it is broken into tokens
      * if unable to allocate, return with EXIT_FAILURE
      */
-    if ((in_table = // fill in
+    if ((in_table = malloc(in_colcnt * sizeof(char*))) == NULL) {
         fprintf(stderr, "%s: malloc() failed input table\n", *argv);
         return EXIT_FAILURE;
     }
@@ -86,8 +86,8 @@ main(int argc, char **argv)
      * You can drop and repeat any of the input record columns.
      * if unable to allocate, return with EXIT_FAILURE
      */
-    out_colcnt = argc - /* fill in */;
-    if ((out_table = // fill in
+    out_colcnt = argc - colargs;
+    if ((out_table = malloc(sizeof(int*) * out_colcnt)) == NULL) {// fill in
         fprintf(stderr, "%s: malloc() failed output table\n", *argv);
         free(in_table);
         return EXIT_FAILURE;
@@ -99,7 +99,7 @@ main(int argc, char **argv)
      */
     saw_error = 0;
     otpt = out_table;
-    colpt = argv + /* fill in */;
+    colpt = argv + colargs;
 
     while (*colpt != NULL) {
         /*
@@ -113,7 +113,9 @@ main(int argc, char **argv)
          * use strtoul() cast to an int see misc.c for an example
          * make sure to detect errors as shown in misc.c
          */
-
+        *otpt = strtoul(*colpt, &endptr, 10) - 1;
+        if (*otpt < 0 || *otpt > in_colcnt - 1)
+            saw_error++;
         /*
          * step to the next output column
          */
@@ -127,6 +129,8 @@ main(int argc, char **argv)
      */
     if (saw_error != 0) {
        /* you need to free memory */;
+        free(in_table);
+        free(out_table);
         return EXIT_FAILURE;
     }
 
@@ -136,13 +140,13 @@ main(int argc, char **argv)
      */
     linecnt = 0;
 
-    while (/* insert getline here use variables buf and bufsz */ > 0) {
+    while (getline(&buf, &bufsz, stdin) > 0) {
         linecnt++;
 
         /*
          * skip until first specified input line
          */
-        if (linecnt /* fill in */)
+        if (linecnt < st_ln)
             continue;
 
         /*
@@ -154,22 +158,21 @@ main(int argc, char **argv)
         else
             dpcnt += wr_row(in_table, out_table, out_colcnt, outdelim,
                              linecnt, argv);
-
         /*
          * Have we have reached last line specified? if so we are done
          */
-        if ((end_ln > 0) && /* fill in */)
-            /* fill in */;
+        if ((end_ln > 0) && linecnt >= end_ln)
+            break;
     }
 
     /*
      * if there were less lines in the input than specified alert the user
      */
-    if ((end_ln > 0) && /* fill in */)) {
+    if ((end_ln > 0) && (linecnt < end_ln - st_ln + 1)) {
         fprintf(stderr,
             "%s: Input less lines (%lu) than specified -e (%lu)\n",
             *argv, linecnt, end_ln);
-        retval = /* */;
+        retval = EXIT_FAILURE;
     }
 
     /*
@@ -182,10 +185,10 @@ main(int argc, char **argv)
         if (end_ln > 0)
             linecnt = end_ln - st_ln + 1;
         else
-            linecnt -=/* fill in */
+            linecnt -= st_ln - 1;
         fprintf(stderr, "%s: %lu dropped out of %lu processed\n", *argv,
                 dpcnt, linecnt);
-        retval = /* */;
+        retval = EXIT_FAILURE;
     }
 
 
@@ -193,5 +196,8 @@ main(int argc, char **argv)
      * keep valgrind happy even though we are exiting and memory will be freed
      */
     /* free memory here */
-    return /* fill in */;
+    free(in_table);
+    free(out_table);
+    free(buf);
+    return retval;
 }
