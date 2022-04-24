@@ -46,116 +46,73 @@ split_input(char *buf, char delim, int cnt, char **table, unsigned long lineno,
             char **argv)
 {
     /*
-     * delete these comments and add your own before submitting your code
+     * 0 start
+     * 1 quoted field
+     * 2 unquoted field
+     * 3 end quote
+     * 4 MFQ (missing final quote)
+     * 5 NTP (not terminated properly)
+     * 6 QNA (quote not allowed)
+     * 7 end
      */
-    /*
-     * build the table of pointers to columns in a loop that walks the input
-     * buffer (single record) until the '\0' is seen at the end of the buffer
-     *
-     * Walk the input buffer using pointers only, looking for the delimiter or
-     * a '\n', and making sure to stop at '\0'. For each delimiter or the final
-     * newline '\n' after the last record, replace the delimiter or '\n' with a
-     * '\0' to terminate that token. Store the pointer to the next char in the
-     * next input array (char **table) entry. Repeat this process until you
-     * either reach the end of the input line or fill all array entries. You
-     * should not need to zero out the array on each pass, you just keep track
-     * of which element pointer is being processed. At the end of processing
-     * the input line, you should have an array filled with pointers to the
-     * start of each field (column) in the record and each field is a properly
-     * '\0' terminated string.
-     *
-     * At the end of the loop you must check you have exactly the number of columns
-     * as specified on the command line in the record (in parameter cnt)
-     *
-     * Error messages:
-     * too many columns in record call dropmsg("too many columns", lineno, argv);
-     * too few columns in record call dropmsg("too few columns", lineno, argv);
-     */
-
-    /*
-     * delete these comments and add your own before submitting your code
-     */
-    /*
-     * How to process each field/column
-     * first: check if the first char in the field is a " or not.
-     * if it is a " then process it as a quoted field. o.w process it
-     * as a unquoted field.
-     *
-     * the rules for proper fields/columns are listed in the PA writeup
-     *
-     * error messages for unquoted fields
-     *
-     * dropmsg("A \" is not allowed inside unquoted field", lineno, argv);
-     *
-     * error messages for quoted fields
-     *
-     * quoted field where the last character in the field was not a quote.
-     * dropmsg("Quoted field not terminated properly", lineno, argv);
-     *
-     * quoted field where the closing " was missing
-     * dropmsg("Quoted field missing final quote", lineno, argv);
-     */
-    /*
-    0 start
-    1 quoted field
-    2 unquoted field
-    3 end quote
-    4 MFQ (missing final quote)
-    5 NTP (not terminated properly)
-    6 QNA (quote not allowed)
-    7 end
-    */
     int state = 0;
     int colCnt = 0;
     char *cur = buf;
     while (*cur) {
         switch (state) {
-            case 0: /*initial state*/
-                /*if possible, put current character's pointer in the table*/
+            case 0: /* initial state */
+                /* if possible, put current character's pointer in the table */
                 if (colCnt < cnt)
                     *(table + colCnt) = cur;
-                /*update table column count*/
+                /* update table column count */
                 colCnt++;
-                /*do different things depending on the value of
-                the current character*/
-                /*if the current character is a quote,
-                put the function in quote state and increment buffer ptr*/
+                /* do different things depending on the value of
+                 * the current character
+                 */
+                /* if the current character is a quote,
+                 * put the function in quote state and increment buffer ptr
+                 */
                 if (*cur == '\"') {
                     state = 1;
                     cur++;
                     continue;
                 }
-                /*if the current character is a newline,
-                null out the newline and end the while loop*/
+                /* if the current character is a newline,
+                 * null out the newline and end the while loop
+                 */
                 if (*cur == '\n') {
                     *cur = '\0';
                     continue;
                 }
-                /*if the current character is the delimiter,
-                null out the delimiter and advance*/
+                /* if the current character is the delimiter,
+                 * null out the delimiter and advance
+                 */
                 if (*cur == delim) {
                     *cur = '\0';
                     cur++;
                     continue;
                 }
-                /*for any other character, put the function in an
-                unquoted state and advance*/
+                /* for any other character, put the function in an
+                 * unquoted state and advance
+                 */
                 else {
                     state = 2;
                     cur++;
                     continue;
                 }
                 break;
-            case 1: /*quoted state*/
+            case 1: /* quoted state */
                 /* if the current character is a newline,
-                then the final quote is missing, since all
-                the other fields thus far have been fine*/
+                 * then the final quote is missing, since all
+                 * the other fields thus far have been fine
+                 */
                 if (*cur == '\n') {
                     state = 4; /* MFQ state */
                     continue;
                 }
                 /* if the current chracter is an ending quote, 
-                put the function in the end quote state and advance */
+                 * put the function in the end quote state and advance
+                 */
                 if (*cur == '\"') {
                     state = 3; /* end quote state */
                     cur++;
@@ -167,31 +124,34 @@ split_input(char *buf, char delim, int cnt, char **table, unsigned long lineno,
                     continue;
                 }
                 break;
-            case 2: /*unquoted state*/
-                /*if the current character is the delimeter,
-                null out the character, return to the initial state,
-                and advance*/
+            case 2: /* unquoted state */
+                /* if the current character is the delimeter,
+                 * null out the character, return to the initial state,
+                 * and advance
+                 */
                 if (*cur == delim) {
                     *cur = '\0';
                     state = 0;
                     cur++;
                     continue;
                 }
-                /*if the current character is a newline, null out the
-                newline and end the while loop*/
+                /* if the current character is a newline, null out the
+                 * newline and end the while loop
+                 */
                 if (*cur == '\n') {
                     *cur = '\0';
                     continue;
                 }
                 /* if the current character is a quote, then
-                return a quote not allowed error, since unquoted fields 
-                should not have quotes*/
+                 * return a quote not allowed error, since unquoted fields 
+                 * should not have quotes*/
                 if (*cur == '\"') {
-                    state = 6; /* QNA state*/
+                    state = 6; /* QNA state */
                     continue;
                 }
                 /* otherwise just advance by 1 since we're still in the 
-                unquoted field*/
+                 * unquoted field
+                 */
                 else {
                     cur++;
                     continue;
@@ -199,61 +159,63 @@ split_input(char *buf, char delim, int cnt, char **table, unsigned long lineno,
                 break;
             case 3: /* end quote state*/
                 /* if the current character is the delimiter, null
-                out the current character, set the current state to start,
-                and advance*/
+                 * out the current character, set the current state to start,
+                 * and advance
+                 */
                 if (*cur == delim) {
                     *cur = '\0';
-                    state = 0; /* starting state*/
+                    state = 0; /* starting state */
                     cur++;
                     continue;
                 }
                 /* if the current character is a newline, null
-                out the newline and end the while loop*/
+                 * out the newline and end the while loop
+                 */
                 if (*cur == '\n') {
                     *cur = '\0';
                     continue;
                 }
                 if (*cur == '\"') {
-                    state = 1; /*quote state*/
+                    state = 1; /* quote state */
                     cur++;
                     continue;
                 }
                 /* if the current character is anything else, the
-                quote is not terminated properly and we should therefore
-                return that state*/
+                 * quote is not terminated properly and we should therefore
+                 * return that state
+                 */
                 else {
-                    state = 5; /* NTP state*/
+                    state = 5; /* NTP state */
                     continue;
                 }
                 break;
             case 4: /* MFQ state */
                 dropmsg("Quoted field missing final quote", lineno, argv);
                 return -1;
-            case 5: /* NTP state*/
+            case 5: /* NTP state */
                 dropmsg("Quoted field not terminated properly", lineno, argv);
                 return -1;
-            case 6: /* QNA state*/
+            case 6: /* QNA state */
                 dropmsg("A \" is not allowed inside unquoted field", lineno, argv);
                 return -1;
-            case 7: /* unused end state*/
-                /*immediately end the while loop*/
+            case 7: /* unused end state */
+                /* immediately end the while loop */
                 *cur = '\0';
                 continue;
                 break;
         }
     }
-    fprintf(stderr, "line %lu: %i columns found, %i columns expected\n", lineno, colCnt, cnt);
-    /* if we have too few columns*/
+    /* if we have too few columns */
     if (colCnt < cnt) {
         dropmsg("too few columns", lineno, argv);
         return -1;
     }
-    /* if we have too many columns*/
+    /* if we have too many columns */
     if (colCnt > cnt) {
         dropmsg("too many columns", lineno, argv);
         return -1;
     }
-    /* otherwise, split occurred successfully*/
+    /* otherwise, split occurred successfully */
     return 0;
 }
 
@@ -279,36 +241,19 @@ int
 wr_row(char **in_tab, int *out_tab, int out_cnt, char delim,
         unsigned long lineno, char **argv)
 {
-    /*
-     * delete these comments and add your own before submitting your code
-     */
-    /*
-     * print all the columns execept the last one with a trailing delimiter
-     *
-     * Walk down the output array, (parameter int *out_tab), from the first
-     * element in the array. Each element in the output array contains the
-     * index number of the next field to write to the standard output stream.
-     * Use this number as an index into the input array,
-     * (parameter char **in_tab), to get the pointer to the input field you
-     * need to output (remember array indexes start at 0 and the columns are
-     * numbered from 1). The number of output record fields (also the number
-     * of elements in in_tab) is in the parameter int out_cnt. Use the
-     * parameter char delim as the delimiter in your output records that you write to the standard output stream.
-     *
-     * special case!
-     * if only one output column and input is empty line, skip it
-     * (do not print it) and do the following
-     * dropmsg("empty column", lineno, argv);
-     * return 1
-     */
     /* handle special case*/
     if (out_cnt == 1 && *(*(in_tab + *out_tab)) == '\0') {
         dropmsg("empty column", lineno, argv);
         return 1;
     }
+    /* iterate through out_tab to get in_tab indices to output,
+     * and then output those in_tab indices 
+     */
     for (int i = 0; i < out_cnt; i++) {
-        fprintf(stderr, "line %lu, col %i: message %s\n", lineno, i + 1, *(in_tab + *(out_tab + i)));
         printf("%s", *(in_tab + *(out_tab + i)));
+        /* print newline if this is the last field, trailing delimiter 
+         * otherwise.
+         */
         if (i == out_cnt - 1) {
             printf("\n");
         }
@@ -316,5 +261,6 @@ wr_row(char **in_tab, int *out_tab, int out_cnt, char delim,
             printf("%c", delim);
         }
     }
+    /* if the code gets to this point then it is succesful. */
     return 0;
 }
