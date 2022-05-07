@@ -9,7 +9,7 @@
 #include "hashdb.h"
 
 //uncomment the next line when you want to use your routine
-//#define MYCODE
+#define MYCODE
 #ifndef MYCODE
 TODO(USING THE SOLUTION FUNCTION NOT MY CODE)
 #else
