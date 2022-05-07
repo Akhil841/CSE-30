@@ -10,7 +10,7 @@
 #include "readsubs.h"
 
 //uncomment the next line when you want to use your routine
-//#define MYCODE
+#//define MYCODE
 #ifndef MYCODE
 TODO(USING THE SOLUTION FUNCTION NOT MY CODE)
 #else
@@ -70,6 +70,70 @@ int
 insert_ticket(struct vehicle **hashtab, uint32_t tabsz, struct fine *fineTab, char *summ,
             char *plate, char *state, char *date, int code, char **argv)
 {
-/* insert your code here */
+    /* hash the licence plate number to get the vehicle's location */
+    uint32_t hashVal = hash(plate, argv) % tabsz;
+    /* store vehicle in this variable */
+    struct vehicle *nv;
+    /* whether the vehicle already exists in the database */
+    int found = 1;
+    /* assign nv to its existing counterpart or malloc its size to it if it 
+     * doesn't exist
+     */
+    if (!(nv = vehicle_lookup(hashtab, tabsz, plate, state, argv))) {
+        found = 0;
+        if (!(nv = malloc(sizeof(*nv)))) {
+            /* this will only occur if there isn't 
+             * enough memory to malloc a new vehicle 
+             */
+            fprintf(stderr, "Not enough memory");
+            return -1;
+        }
+    }
+    /* put the vehicle, if new, to the front of the hash chain and get its
+     * successor to prepare for initializing the vehicle 
+     */
+    struct vehicle *nextV = NULL;
+    if (!found) {
+        nextV = *(hashtab + hashVal);
+        *(hashtab + hashVal) = nv;
+    }
+    /* Get summid and date in the correct format for ticket initialization */
+    unsigned long long summid;
+    if (strtosumid(summ, &summid, argv) != 0)
+        return -1;
+    time_t inDate;
+    if (strtoDate(date, &inDate, argv) != 0)
+        return -1;
+    /* malloc and initialize ticket */
+    struct ticket *newticket = malloc(sizeof(*newticket));
+    *newticket = (struct ticket) {.summons = summid, 
+                                  .date = inDate, 
+                                  .code = code, 
+                                  .next = NULL};
+    /* initialize vehicle if it doesn't already exist */
+    if (!found) {
+        *nv = (struct vehicle) {.state = strdup(state), 
+                                .plate = strdup(plate), 
+                                .tot_fine = 0, 
+                                .cnt_ticket = 0, 
+                                .next = nextV, 
+                                .head = newticket};
+    }
+    /* otherwise find the end of the vehicle's ticket LL to store the ticket */
+    else {
+        struct ticket *evt = nv->head;
+        struct ticket *prev = evt;
+        while (evt) {
+            prev = evt;
+            evt = evt->next;
+        }
+        /* store the ticket at the end of the ticket LL */
+        prev->next = newticket;
+    }
+    /* update the vehicle's total fine and # of tickets */
+    nv->tot_fine += (fineTab + code)->fine;
+    nv->cnt_ticket += 1;
+    /* return 0 for success */
+    return 0;
 }
 #endif

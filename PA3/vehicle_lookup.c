@@ -32,6 +32,25 @@ struct vehicle *
 vehicle_lookup(struct vehicle **hashtab, uint32_t tabsz, char *plate,
     char *state, char **argv)
 {
-/* insert your code here */
+    /* get hashed value to determine which hash chain to search */
+    uint32_t hashVal = hash(plate, argv) % tabsz;
+    /* initialize current vehicle struct that we are searching 
+     * as the first member of the chain
+     */
+    struct vehicle *curr = *(hashtab + hashVal);
+    /* Check each hash chain member and stop at a null pointer
+     * if the state and plate of the current vehicle match 
+     * what we are looking for, return that vehicle
+     */
+    while (curr) {
+        if (strcmp(state, curr->state) == 0 && 
+        strcmp(plate, curr->plate) == 0) {
+            return curr;
+        }
+        /* if the current vehicle is not correct, advance to the next */
+        curr = curr->next;
+    }
+    /* if the vehicle is not found return NULL */
+    return NULL;
 }
 #endif
