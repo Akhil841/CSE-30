@@ -2,7 +2,11 @@
 IN="in"
 OUT="out"
 GOOD="good"
+<<<<<<< HEAD
 for index in {1..6}
+=======
+for index in {1..3}
+>>>>>>> fd00ee2c42933777e90b44365660eee40cedf7e3
 do
     echo "--- Starting cw test$index ----------"
     rm -f $OUT/out$index $OUT/err$index
