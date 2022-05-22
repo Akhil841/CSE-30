@@ -38,6 +38,13 @@ result:
      * (2) put the address of cntword in r2
      * (3) put the address of cntchar in r3
      */
+    ldr     r0, =.Lmsg
+    ldr     r1, =cntline
+    ldr     r1, [r1]
+    ldr     r2, =cntword
+    ldr     r2, [r2]
+    ldr     r3, =cntchar
+    ldr     r3, [r3]
     bl      printf
     
     // do not edit below this line

@@ -27,7 +27,6 @@ main(int argc, char **argv)
      * <= 0 signals end of file
      * the buffer contains an array of chars, not a string
      */
-    
 /*
  * add your code to
  * (1)  count the number of characters in the words
@@ -35,6 +34,54 @@ main(int argc, char **argv)
  * (2) the number of words. words are delimited by space, \n or \t
  * (3) the number of \n in the input
  */
+    /* store valid character count here */
+    int cnt = 0;
+    /* fill buffer and check if we have reached EOF*/
+    while ((cnt = rd()) > 0) {
+        /* variable for current character */
+        char *cur = buffer;
+        /* 
+         * 0 initial/non-word state
+         * 1 word state
+         */
+        int state = 0;
+        /* iterate character by character to do counting */
+        for (int i = 0; i < cnt; i++) {
+            /* 
+             * if the character is not a delimiter 
+             * or a newline update char cnt
+             */
+            if (*cur != '\n' && *cur != '\t' && *cur != ' ') cntchar++;
+            /* if the last character wasn't part of a word */
+            if (state == 0) {
+                /* if the current character is the start of a word */
+                if (*cur != '\n' && *cur != '\t' && *cur != ' ') {
+                    /* change to word state */
+                    state = 1;
+                    /* update word counter*/
+                    cntword++;
+                }
+                /* update newline counter if needed */
+                if (*cur == '\n') {
+                    cntline++;
+                }
+            }
+            /* if the last character was part of a word */
+            if (state == 1) {
+                /* 
+                 * if the word is ended by a delimiter or a newline,
+                 * switch states 
+                 */
+                if (*cur == '\t' || *cur == ' ' || *cur == '\n') {
+                    state = 0;
+                    /* update newline counter if needed */
+                    if (*cur == '\n') cntline++;
+                }
+            }
+            /* go to next character in the buffer */
+            cur++;
+        }
+    }
 
     /*
      * result() prints the summary of the values in the global
