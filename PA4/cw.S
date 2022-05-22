@@ -73,7 +73,7 @@ main:
     //bl      rd                  // read another buffer
     //cmp     r0, 0               // if r0 <= 0 then EOF
 // your code here
-    //r2 is current state
+    //r7 is current state
     //0 non-word state
     //1 word state
     mov    r7, 0     // int state = 0
@@ -124,8 +124,7 @@ main:
                                 //r0 stores whether we add to the character count
                                 //or not
             .Lendif1:
-            //perform different actions depending on whether or not
-            //the current state is word or not
+            //if current character is a newline, increment newline ctr
             cmp     r6, '\n'
             beq     .Lupnln
             b       .Lcont
@@ -136,9 +135,13 @@ main:
             ldr     r3, =cntline
             str     r2, [r3]
             .Lcont:
+            //depending on state, perform different actions
             cmp     r7, 0
             beq     .Lstate0
             b       .Lstate1
+            //previous character was not part of a word
+            //if current character is a word char, flip state
+            //and increment word ctr
             .Lstate0:
             cmp     r6, '\n'
             bne     .Lnext1
@@ -158,7 +161,11 @@ main:
             add     r2, 1
             ldr     r3, =cntword
             str     r2, [r3]
+            //go to next loop iteration
             b       .Lendfor
+            //previous character was part of a word
+            //if current character is a word-ending character,
+            //change state and go to next iteration
             .Lstate1:
             cmp     r6, '\n'
             beq     .Lwordend
@@ -173,10 +180,11 @@ main:
             b       .Lendfor
             .Lwordend:
             mov     r7, 0
+            //go to next iteration   
             .Lendfor:
             add     r1, r1, 1
             b       .Lfor 
-    .Lendwhile: // }
+    .Lendwhile:
     // do not edit from here to end of this file
     bl      result              // print the results
     mov     r0, EXIT_SUCCESS    // fall through to .Lexit
