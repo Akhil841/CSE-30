@@ -2,7 +2,7 @@
 IN="in"
 OUT="out"
 GOOD="good"
-for index in {1..6}
+for index in {1..2}
 do
     echo "--- Starting ccw test$index ----------"
     rm -f $OUT/outC$index $OUT/errC$index
