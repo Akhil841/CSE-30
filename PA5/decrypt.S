@@ -12,7 +12,7 @@
     .text     // start of text segment
 
     //////////////////////////////////////////////////
-    // void decrypt(char *IOBUF, char *BOOKBUF, int cnt) 
+    // int decrypt(char *IOBUF, char *BOOKBUF, int cnt) 
     // decrypts  IOBUF using BOOKBUF; result in IOBUF
     //////////////////////////////////////////////////
     .global decrypt

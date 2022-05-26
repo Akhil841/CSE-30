@@ -47,7 +47,7 @@ setup(int argc, char *argv[], int *mode, FILE **book, FILE **input, FILE **outpu
     *book = NULL;
     *input = NULL;
     *output = NULL;
-    while ((opt = getopt(argc, argv, "edb:o:")) != -1) {
+    while ((opt = getopt(argc, argv, "edb:")) != -1) {
         switch (opt) {
         case 'e':
             eflag = 1;

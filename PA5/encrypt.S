@@ -12,7 +12,7 @@
     .text     // start of text segment
 
     //////////////////////////////////////////////////
-    // void encrypt(char *IOBUF, char *BOOKBUF, int cnt)
+    // int encrypt(char *IOBUF, char *BOOKBUF, int cnt)
     // encrypts  IOBUF with BOOKBUF; updating IOBUF
     //////////////////////////////////////////////////
     .global encrypt
