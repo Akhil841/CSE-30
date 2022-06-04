@@ -1,4 +1,7 @@
- // version 1.0 05/22/2022 //
+//uncomment the next line when you want to use your routine
+#define MYCODE
+#ifdef MYCODE
+// version 1.01 05/27/2022
     .arch armv6
     .arm
     .fpu vfp
@@ -23,7 +26,14 @@ errmsg:
     add     fp, sp, FP_OFF
 
 //your code here
-
+    //place pointer to first character in arg 1
+    mov     r1, r0
+    //place output file (stderr) in arg 0
+    ldr     r0, =stderr
+    ldr     r0, [r0]
+    //call fprintf
+    bl      fprintf
+    .Lexit:
     sub     sp, fp, FP_OFF
     pop     {fp, lr}
     bx      lr
@@ -31,3 +41,4 @@ errmsg:
     .size errmsg, (. - errmsg)
     .section .note.GNU-stack,"",%progbits
 .end
+#endif

@@ -32,13 +32,11 @@ main(int argc, char **argv)
         else
             cnt = decrypt(IOBUF, BOOKBUF, cnt);
         if ((cnt == EXIT_FAIL) || (wrbuf(IOBUF, cnt, FPOUT) == EXIT_FAIL)) {
-            cleanup(EXIT_FAIL);
-            return EXIT_FAILURE;
+            return cleanup(EXIT_FAIL);
         }
     }
     /*
      * close the files
      */
-    cleanup(cnt);
-    return EXIT_SUCCESS;
+    return cleanup(cnt);
 }

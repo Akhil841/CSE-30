@@ -1,11 +1,12 @@
 # if you type 'make' without arguments, this is the default
-PROG        = encrypter Cencrypter 
+PROG        = encrypter
+CPROG       = Cencrypter
 all:        $(PROG)
 
 # header files and the associated object files
 HEAD        = encrypter.h
 OBJ         = main.o subs.o encrypt.o decrypt.o errmsg.o rdbuf.o wrbuf.o
-COBJ        = Cmain.o subs.o Cerrmsg.o Crdbuf.o Cwrbuf.o
+COBJ        = Cmain.o subs.o Cerrmsg.o Crdbuf.o Cwrbuf.o encrypt.o decrypt.o
 
 # Testing
 TDIR        = ./tests
@@ -37,16 +38,17 @@ $(OBJ):     $(HEAD)
 	$(CC) $(CFLAGS) $(ASFLAGS)  -c -o $@ $<
 
 # specify how to compile/assemble the target
-A:    encrypter
+A:      $(PROG)
 encrypter:  $(OBJ)
 	$(CC) $(CFLAGS) $(OBJ) $(LIB) -o $@
 
 
-C:      Cencrypter
+C:      $(CPROG)
 Cencrypter: $(COBJ)
 	$(CC) $(CFLAGS) $(COBJ) $(LIB) -o $@
 
 # test the program
+test:   Atest
 Atest:	    $(PROG)
 	(cd $(TDIR); make $@)
 

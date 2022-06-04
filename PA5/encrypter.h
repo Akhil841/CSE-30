@@ -13,5 +13,8 @@ int decrypt(char *, char *, int);
 int wrbuf(char *, int, FILE *);
 int cleanup(int);
 void errmsg(char *);
+#else
+#define EXIT_FAILURE	1
+#define EXIT_SUCCESS	0
 #endif
 #endif
