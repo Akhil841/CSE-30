@@ -34,13 +34,10 @@
     .equ    FPIN,       4 + FPBOOK    // FILE * to input file
     .equ    FPOUT,      4 + FPIN      // FILE * to output file
     .equ    MODE,       4 + FPOUT     // decrypt or encrypt mode
-    .equ    FPBOOKP,    4 + MODE      // pointer to FPBOOK
-    .equ    FPINP,      4 + FPBOOKP   // pointer to FPIN
-    .equ    FPOUTP,     4 + FPINP     // pointer to FPOUT
-    .equ    IOBUF,      BUFSZ + FPOUTP  // buffer for input file
+    .equ    IOBUF,      BUFSZ + MODE  // buffer for input file
     .equ    BOOKBUF,    BUFSZ + IOBUF // buffer for book file
     // add local variables here: adjust PAD size
-    .equ    PAD,        4 + BOOKBUF   // Stack frame PAD 
+    .equ    PAD,        0 + BOOKBUF   // Stack frame PAD 
     .equ    OARG6,      4 + PAD      // output arg6
     .equ    OARG5,      4 + OARG6    // output arg5 must be at bottom
     .equ    FRAMESZ,    OARG5-FP_OFF// total space for frame
@@ -63,8 +60,8 @@ main:
     add     fp, sp, FP_OFF          // set frame pointer to frame base
     ldr     r3, =FRAMESZ            // frame size is big, use pseudo ldr
     sub     sp, sp, r3              // allocate space for locals and passed args
-    ldr     r8, =IOBUF              // load IOBUF ptr
-    ldr     r9, =BOOKBUF            // load BOOKBUF ptr
+    ldr     r5, =IOBUF              // load IOBUF ptr
+    ldr     r6, =BOOKBUF            // load BOOKBUF ptr
 
     // call int setup(argc, argv, *mode, *FPBOOK, *FPIN, *FPOUT)
     // prepare to call setup
@@ -73,18 +70,12 @@ main:
     sub     r2, fp, MODE
     // r3 must contain FPBOOKP
     sub     r3, fp, FPBOOK
-    str     r3, [fp, -FPBOOKP]
-    sub     r3, fp, FPBOOKP
     // store FPINP in OARG5
-    sub     r6, fp, FPIN
-    str     r6, [fp, -FPINP]
-    sub     r6, fp, FPINP
-    str     r6, [fp, -OARG5]
+    ldr     r7, [fp, -FPIN]
+    str     r7, [fp, -OARG5]
     // store FPOUTP in OARG6
-    sub     r7, fp, FPOUT
-    str     r7, [fp, -FPOUTP]
-    sub     r7, fp, FPOUTP
-    str     r7, [fp, -OARG6]
+    ldr     r9, [fp, -FPOUT]
+    str     r9, [fp, -OARG6]
     // call setup, result in r0
     bl      setup
     // end function if setup failed
@@ -96,17 +87,18 @@ main:
     b       .Lexit
 .Lcontinue:
     // store IOBUF ptr in r4
-    sub     r4, fp, r8
+    sub     r4, fp, r5
     // store BOOKBUF ptr in r5
-    sub     r5, fp, r9
+    sub     r5, fp, r6
     // store mode flag value in r6
     ldr     r6, [fp, -MODE]
     // store FPIN in r7
-    ldr     r7, [fp, -FPINP]
+    ldr     r7, [r7]
     // store FPBOOK in r8
-    ldr     r8, [fp, -FPBOOKP]
+    sub     r8, fp, FPBOOK
+    ldr     r8, [r8]
     // store FPOUT in r9
-    ldr     r9, [fp, -FPOUTP]
+    ldr     r9, [r9]
 .Lloop:
     // int rdbuf(char *IOBUF, char *BOOKBUF, FILE *FPIN
     //              FILE *FPBOOK, int BUFSZ);
