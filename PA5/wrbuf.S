@@ -1,5 +1,5 @@
 //uncomment the next line when you want to use your routine
-#define MYCODE
+//#define MYCODE
 #ifdef MYCODE
 // version 1.0 05/27/2022
     .arch   armv6
