@@ -37,7 +37,7 @@
     .equ    IOBUF,      BUFSZ + MODE  // buffer for input file
     .equ    BOOKBUF,    BUFSZ + IOBUF // buffer for book file
     // add local variables here: adjust PAD size
-    .equ    PAD,        4 + BOOKBUF   // Stack frame PAD 
+    .equ    PAD,        0 + BOOKBUF   // Stack frame PAD 
     .equ    OARG6,      4 + PAD      // output arg6
     .equ    OARG5,      4 + OARG6    // output arg5 must be at bottom
     .equ    FRAMESZ,    OARG5-FP_OFF// total space for frame
